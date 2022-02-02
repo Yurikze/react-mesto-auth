@@ -11,6 +11,8 @@ import { LoadingContext } from '../contexts/LoadingContext';
 import EditAvatarPopup from './EditAvatarPopup';
 import AddPlacePopup from './AddPlacePopup';
 import RemovePlacePopup from './RemovePlacePopup';
+import Login from './Login';
+import Register from './Register';
 
 function App() {
   const [loggedIn, setLoggedIn] = React.useState(true);
@@ -152,8 +154,10 @@ function App() {
         <LoadingContext.Provider value={isLoading}>
           <Header />
           <Switch>
-            <Route path="/sign-up">1</Route>
-            <Route path="/sign-in">1</Route>
+            <Route path="/sign-up">
+              <Register />
+            </Route>
+            <Route path="/sign-in"><Login /></Route>
             <Route exact path="/">
               {loggedIn ? (
                 <>
