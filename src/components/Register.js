@@ -2,12 +2,15 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Popup from './Popup';
 import success from '../images/Union.png';
+import fail from '../images/Unionerr.png';
 
 const Register = ({onRegister, ...props}) => {
   const [registerData, setRegisterData] = useState({
     email: '',
     password: '',
   });
+  const [registerSuccess, setRegisterSuccess] = useState(false)
+  const [isInfoPopupOpen, setIsOpenPopupOpen] = useState(false)
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -20,7 +23,20 @@ const Register = ({onRegister, ...props}) => {
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    onRegister(registerData)
+    return onRegister(registerData)
+    .then((res) => {
+      setRegisterSuccess(true)
+      setRegisterData({
+        email: '',
+        password: '',
+      })
+    })
+    .catch((err) => setRegisterSuccess(false))
+    .finally(() => setIsOpenPopupOpen(true))
+  }
+
+  const closePopupHandler = () => {
+    setIsOpenPopupOpen(false)
   }
 
   return (
@@ -55,19 +71,19 @@ const Register = ({onRegister, ...props}) => {
           </Link>
         </form>
       </div>
-      <Popup isOpen={false} name={props.name} onClose={props.onClose}>
+      <Popup isOpen={isInfoPopupOpen} name={props.name} onClose={closePopupHandler}>
         <div className="popup__content">
           <button
             className="popup__close-btn"
             type="button"
             aria-label="Закрыть"
             data-delete
-            onClick={props.onClose}
+            onClick={closePopupHandler}
           ></button>
           <div className="popup__info-tooltip">
-            <img src={success} alt="Регистрация" />
+            <img src={registerSuccess ? success : fail} alt="Регистрация" />
             <h2 className="popup__title popup__title_placement_tooltip">
-              Вы успешно зарегистрировались!
+              {registerSuccess ? "Вы успешно зарегистрировались!" : "Что-то пошло не так! Попробуйте еще раз."}
             </h2>
           </div>
         </div>

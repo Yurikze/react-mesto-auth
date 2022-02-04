@@ -5,42 +5,35 @@ class Auth {
   }
 
   _parseResponse(res) {
-    try {
-      if (res.ok) {
-        console.log(res)
-        return res.json();
-      }
-    } catch (e) {
-      return `Ошибка: ${e.status}`;
-    }
+    return res.ok
+      ? res.json()
+      : Promise.reject(new Error(`Ошибка ${res.status}: ${res.statusText}`));
   }
 
-  signup({email, password}) {
+  signup({ email, password }) {
+    console.log(email, password)
     return fetch(`${this.baseUrl}/signup`, {
       method: 'POST',
       headers: this.headers,
-      body: JSON.stringify({email, password})
-    }).then(this._parseResponse)
+      body: JSON.stringify({ email, password }),
+    }).then(this._parseResponse);
   }
 
-  signin({email, password}) {
+  signin({ email, password }) {
     return fetch(`${this.baseUrl}/signin`, {
       method: 'POST',
       headers: this.headers,
-      body: JSON.stringify({email, password})
-    }).then(this._parseResponse)
-
+      body: JSON.stringify({ email, password }),
+    }).then(this._parseResponse);
   }
-
 }
-
 
 const auth = new Auth({
   baseUrl: 'https://auth.nomoreparties.co',
   headers: {
     // 'Accept': 'application/json',
     'Content-Type': 'application/json',
-  }
-})
+  },
+});
 
-export default auth
+export default auth;
