@@ -55,14 +55,13 @@ function App() {
   }, []);
 
   const onRegister = (data) => {
-    console.log(data)
-    return auth.signup(data)
-  }
+    return auth.signup(data);
+  };
 
-  const onLogin = data => {
-    console.log(data)
-    return auth.signin(data)
-  }
+  const onLogin = (data) => {
+    console.log(data);
+    return auth.signin(data);
+  };
 
   const handleCardLike = (card) => {
     const isLiked = card.likes.some((i) => i._id === currentUser._id);
@@ -210,9 +209,9 @@ function App() {
                 card={selectedCard}
               />
             </ProtectedRoute>
-            
+
             <Route path="*">
-              {!loggedIn ? <Redirect to="/sign-up" /> : <Redirect to='/' />}
+              {!loggedIn ? <Redirect to="/sign-in" /> : <Redirect to="/" />}
             </Route>
           </Switch>
         </LoadingContext.Provider>
