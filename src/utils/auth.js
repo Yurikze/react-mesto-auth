@@ -11,7 +11,7 @@ class Auth {
   }
 
   signup({ email, password }) {
-    console.log(email, password)
+    console.log(email, password);
     return fetch(`${this.baseUrl}/signup`, {
       method: 'POST',
       headers: this.headers,
@@ -24,6 +24,13 @@ class Auth {
       method: 'POST',
       headers: this.headers,
       body: JSON.stringify({ email, password }),
+    }).then(this._parseResponse);
+  }
+
+  getContent(token) {
+    return fetch(`${this.baseUrl}/users/me`, {
+      method: 'GET',
+      headers: { ...this.headers, Authorization: `Bearer ${token}` },
     }).then(this._parseResponse);
   }
 }
