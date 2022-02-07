@@ -23,7 +23,7 @@ const Register = ({onRegister, ...props}) => {
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    return onRegister(registerData)
+    onRegister(registerData)
     .then((res) => {
       setRegisterSuccess(true)
       setRegisterData({

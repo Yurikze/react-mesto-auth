@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Route, Switch, Redirect } from 'react-router-dom';
+import { Route, Switch, Redirect, useHistory } from 'react-router-dom';
 import Footer from './Footer';
 import Header from './Header';
 import Main from './Main';
@@ -17,6 +17,7 @@ import Register from './Register';
 import ProtectedRoute from './ProtectedRoute';
 
 function App() {
+  const history = useHistory();
   const [loggedIn, setLoggedIn] = React.useState(false);
   const [isEditProfilePopupOpen, setIsEditProfilePopupOpen] =
     React.useState(false);
@@ -33,7 +34,10 @@ function App() {
   React.useEffect(() => {
     async function fetchUserData() {
       const userData = await api.getUserInfo();
-      setCurrentUser(userData);
+      setCurrentUser((user) => ({
+        ...user,
+        ...userData,
+      }));
     }
     try {
       fetchUserData();
@@ -54,14 +58,48 @@ function App() {
     }
   }, []);
 
+  const tokenCheck = () => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      return;
+    }
+
+    auth.getContent(localStorage.getItem('token')).then((res) => {
+      setLoggedIn(true);
+      console.log(res);
+      setCurrentUser((user) => ({
+        ...user,
+        email: res.data.email,
+      }));
+    });
+  };
+
+  React.useEffect(() => {
+    if (loggedIn) {
+      history.push('/');
+    }
+  }, [loggedIn]);
+
+  React.useEffect(() => {
+    tokenCheck();
+  }, []);
+
   const onRegister = (data) => {
     return auth.signup(data);
   };
 
   const onLogin = (data) => {
-    console.log(data);
-    return auth.signin(data);
+    return auth.signin(data).then((res) => {
+      localStorage.setItem('token', res.token);
+      tokenCheck();
+    });
   };
+
+  const onLogout = () => {
+    setLoggedIn(false)
+    localStorage.removeItem('token')
+    history.push('/sign-in')
+  }
 
   const handleCardLike = (card) => {
     const isLiked = card.likes.some((i) => i._id === currentUser._id);
@@ -92,7 +130,10 @@ function App() {
     api
       .updateUserInfo(userData)
       .then((res) => {
-        setCurrentUser(res);
+        setCurrentUser((user) => ({
+          ...user,
+          ...res,
+        }));
         closeAllPopups();
       })
       .catch((err) => console.log(err))
@@ -163,7 +204,7 @@ function App() {
     <div className="page">
       <CurrentUserContext.Provider value={currentUser}>
         <LoadingContext.Provider value={isLoading}>
-          <Header />
+          <Header loggedIn={loggedIn} onLogout={onLogout} />
           <Switch>
             <Route path="/sign-up">
               <Register onRegister={onRegister} />
@@ -211,7 +252,7 @@ function App() {
             </ProtectedRoute>
 
             <Route path="*">
-              {!loggedIn ? <Redirect to="/sign-in" /> : <Redirect to="/" />}
+              <Redirect to="/" />
             </Route>
           </Switch>
         </LoadingContext.Provider>
