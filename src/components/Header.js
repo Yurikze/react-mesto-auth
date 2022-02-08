@@ -13,15 +13,13 @@ const Header = ({ loggedIn, onLogout }) => {
     if (location.pathname === '/sign-up') return setLinkText('Войти');
   }, [location]);
 
-  console.log(user);
-
   return (
     <header className="header">
       <img src={logo} alt="Логотип сайта" className="header__logo" />
       {loggedIn ? (
         <div className="header__user-info">
           <p className="header__user">{user.email}</p>
-          <Link className="header__link" onClick={onLogout}>
+          <Link className="header__link" onClick={onLogout} to="/sign-in">
             Выйти
           </Link>
         </div>
