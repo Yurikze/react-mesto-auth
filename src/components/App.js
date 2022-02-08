@@ -15,10 +15,12 @@ import RemovePlacePopup from './RemovePlacePopup';
 import Login from './Login';
 import Register from './Register';
 import ProtectedRoute from './ProtectedRoute';
+import InfoTooltip from './InfoTooltip';
 
 function App() {
   const history = useHistory();
   const [loggedIn, setLoggedIn] = React.useState(false);
+  const [registerSuccess, setRegisterSuccess] = useState(false);
   const [isEditProfilePopupOpen, setIsEditProfilePopupOpen] =
     React.useState(false);
   const [isAddPlacePopupOpen, setIsAddPlacePopupOpen] = React.useState(false);
@@ -26,6 +28,7 @@ function App() {
     React.useState(false);
   const [isImagePopupOpen, setIsImagePopupOpen] = React.useState(false);
   const [isDeletePopupOpen, setIsDeletePopupOpen] = React.useState(false);
+  const [inInfoTooltipOpen, setIsInfoTooltipOpen] = React.useState(false);
   const [selectedCard, setSelectedCard] = React.useState(null);
   const [currentUser, setCurrentUser] = React.useState(user);
   const [cards, setCards] = React.useState([]);
@@ -64,14 +67,16 @@ function App() {
       return;
     }
 
-    auth.getContent(localStorage.getItem('token')).then((res) => {
-      setLoggedIn(true);
-      console.log(res);
-      setCurrentUser((user) => ({
-        ...user,
-        email: res.data.email,
-      }));
-    });
+    auth
+      .getContent(localStorage.getItem('token'))
+      .then((res) => {
+        setLoggedIn(true);
+        setCurrentUser((user) => ({
+          ...user,
+          email: res.data.email,
+        }));
+      })
+      .catch((e) => console.log(e));
   };
 
   React.useEffect(() => {
@@ -85,21 +90,30 @@ function App() {
   }, []);
 
   const onRegister = (data) => {
-    return auth.signup(data);
+    return auth
+      .signup(data)
+      .then((res) => {
+        setRegisterSuccess(true);
+      })
+      .catch((e) => console.log(e))
+      .finally(() => setIsInfoTooltipOpen(true));
   };
 
   const onLogin = (data) => {
-    return auth.signin(data).then((res) => {
-      localStorage.setItem('token', res.token);
-      tokenCheck();
-    });
+    return auth
+      .signin(data)
+      .then((res) => {
+        localStorage.setItem('token', res.token);
+        tokenCheck();
+      })
+      .catch((e) => console.log(e));
   };
 
   const onLogout = () => {
-    setLoggedIn(false)
-    localStorage.removeItem('token')
-    history.push('/sign-in')
-  }
+    setLoggedIn(false);
+    localStorage.removeItem('token');
+    history.push('/sign-in');
+  };
 
   const handleCardLike = (card) => {
     const isLiked = card.likes.some((i) => i._id === currentUser._id);
@@ -197,6 +211,7 @@ function App() {
     setIsEditAvatarPopupOpen(false);
     setIsImagePopupOpen(false);
     setIsDeletePopupOpen(false);
+    setIsInfoTooltipOpen(false);
     setSelectedCard(null);
   };
 
@@ -207,7 +222,15 @@ function App() {
           <Header loggedIn={loggedIn} onLogout={onLogout} />
           <Switch>
             <Route path="/sign-up">
-              <Register onRegister={onRegister} />
+              <Register
+                onRegister={onRegister}
+                registerSuccess={registerSuccess}
+              />
+              <InfoTooltip
+                isOpen={inInfoTooltipOpen}
+                registerSuccess={registerSuccess}
+                onClose={closeAllPopups}
+              />
             </Route>
             <Route path="/sign-in">
               <Login onLogin={onLogin} />
